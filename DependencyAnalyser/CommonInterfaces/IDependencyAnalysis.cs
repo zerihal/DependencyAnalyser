@@ -6,8 +6,6 @@
 
         public IAnalysedFile AnalyseAssembly(object assembly);
 
-        public IEnumerable<IAnalysedFile> AnalyseProject(string projectPath);
-
-        public IEnumerable<ICircularDependency> FindCircularDependencies(IEnumerable<IAnalysedFile> analysedFiles);
+        public IEnumerable<IAnalysedApplicationFile> AnalyseApplication(string projectPath);
     }
 }
