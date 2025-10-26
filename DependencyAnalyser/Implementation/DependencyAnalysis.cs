@@ -1,5 +1,7 @@
 ﻿using DependencyAnalyser.DotNet.CommonInterfaces;
+using DependencyAnalyser.DotNet.Enums;
 using DependencyAnalyser.DotNet.Extensions;
+using DependencyAnalyser.DotNet.Native;
 using System.Reflection;
 
 namespace DependencyAnalyser.DotNet.Implementation
@@ -29,6 +31,11 @@ namespace DependencyAnalyser.DotNet.Implementation
                 }
                 else if (assembly is Stream stream)
                 {
+                    if (HelperMethods.GetAssemblyType(stream) != AssemblyType.Managed)
+                    {
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(stream);
+                    }
+
                     using (var ms = new MemoryStream())
                     {
                         stream.CopyTo(ms);
@@ -37,6 +44,13 @@ namespace DependencyAnalyser.DotNet.Implementation
                 }
                 else if (assembly is byte[] byteArray)
                 {
+                    var bytesStream = HelperMethods.GetStreamFromBytes(byteArray);
+
+                    if (HelperMethods.GetAssemblyType(bytesStream) != AssemblyType.Managed)
+                    {
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(bytesStream);
+                    }
+
                     analysisAssembly = Assembly.Load(byteArray);
                 }
                 else
@@ -60,7 +74,7 @@ namespace DependencyAnalyser.DotNet.Implementation
                 return AnalysedFile.UnsupportedFile();
             }
 
-            var fileType = analysisAssembly.EntryPoint != null ? Enums.FileType.DotNetExe : Enums.FileType.DotNetDll;
+            var fileType = analysisAssembly.EntryPoint != null ? FileType.DotNetExe : FileType.DotNetDll;
             var referenceAssemblies = analysisAssembly.GetReferencedAssemblies().Select(a => a.FullName).ToList();
 
             return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies);

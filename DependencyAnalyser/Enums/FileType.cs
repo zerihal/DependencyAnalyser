@@ -4,8 +4,8 @@
     {
         DotNetDll,
         DotNetExe,
-        CppDll,
-        CppExe,
+        NativeDll,
+        NativeExe,
         Unsupported,
         Invalid
     }
