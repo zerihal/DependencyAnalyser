@@ -1,4 +1,4 @@
-﻿namespace DependencyAnalyser.DotNet.Enums
+﻿namespace AssemblyDependencyAnalyser.Enums
 {
     public enum AssemblyType
     {

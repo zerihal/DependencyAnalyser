@@ -1,4 +1,4 @@
-﻿namespace DependencyAnalyser.DotNet.CommonInterfaces
+﻿namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
     public interface IAnalysedApplicationFile : IAnalysedFile
     {

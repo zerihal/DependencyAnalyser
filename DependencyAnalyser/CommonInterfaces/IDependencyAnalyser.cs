@@ -1,6 +1,6 @@
-﻿namespace DependencyAnalyser.DotNet.CommonInterfaces
+﻿namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
-    public interface IDependencyAnalysis
+    public interface IDependencyAnalyser
     {
         public IAnalysedFile AnalyseAssembly(string assemblyPath);
 

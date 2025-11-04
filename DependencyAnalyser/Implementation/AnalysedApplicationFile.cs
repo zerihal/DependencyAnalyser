@@ -1,7 +1,7 @@
-﻿using DependencyAnalyser.DotNet.CommonInterfaces;
-using DependencyAnalyser.DotNet.Enums;
+﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Enums;
 
-namespace DependencyAnalyser.DotNet.Implementation
+namespace AssemblyDependencyAnalyser.Implementation
 {
     public class AnalysedApplicationFile : AnalysedFile, IAnalysedApplicationFile
     {

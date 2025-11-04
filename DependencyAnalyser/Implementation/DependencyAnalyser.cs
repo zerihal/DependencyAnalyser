@@ -1,18 +1,46 @@
-﻿using DependencyAnalyser.DotNet.CommonInterfaces;
-using DependencyAnalyser.DotNet.Enums;
-using DependencyAnalyser.DotNet.Extensions;
-using DependencyAnalyser.DotNet.Native;
+﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Extensions;
+using AssemblyDependencyAnalyser.Native;
 using System.Reflection;
 
-namespace DependencyAnalyser.DotNet.Implementation
+namespace AssemblyDependencyAnalyser.Implementation
 {
-    public class DependencyAnalysis : IDependencyAnalysis
+    public class DependencyAnalyser : IDependencyAnalyser
     {
         public IAnalysedFile AnalyseAssembly(string assemblyPath)
         {
-            if (!File.Exists(assemblyPath))
+            if (File.Exists(assemblyPath))
             {
-                return AnalyseAssembly(Assembly.LoadFrom(assemblyPath));
+                if (HelperMethods.GetFileType(assemblyPath, out var stream) != AssemblyType.Managed)
+                {
+                    // C/C++ exe or dll - get native analysed file.
+                    try
+                    {
+                        using (stream)
+                        {
+                            return NativeAssemblyMethods.GetNativeAnalysedFile(stream);
+                        }
+                    }
+                    catch
+                    {
+                        // .NET core bootstrapper (exe) returns as managed, but will not be interpreted by PeNet / native
+                        // parser, so return as OtherExeFile (will also include other unsupported exe files).
+                        if (Path.GetExtension(assemblyPath).Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                            return AnalysedFile.OtherExeFile(Path.GetFileName(assemblyPath) ?? "[Unsupported executable]");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        return AnalyseAssembly(Assembly.LoadFrom(assemblyPath));
+                    }
+                    catch
+                    {
+                        return AnalyseAssembly(stream);
+                    }
+                }
             }
 
             // Log?
@@ -58,10 +86,6 @@ namespace DependencyAnalyser.DotNet.Implementation
                     return AnalysedFile.UnsupportedFile();
                 }
             }
-            catch (BadImageFormatException)
-            {
-                // This might be a native (C++) assembly
-            }
             catch (Exception e)
             {
                 // Log exception
@@ -77,7 +101,8 @@ namespace DependencyAnalyser.DotNet.Implementation
             var fileType = analysisAssembly.EntryPoint != null ? FileType.DotNetExe : FileType.DotNetDll;
             var referenceAssemblies = analysisAssembly.GetReferencedAssemblies().Select(a => a.FullName).ToList();
 
-            return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies);
+            return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies, 
+                HelperMethods.GetFrameworkVersionInfo(analysisAssembly));
         }
 
         public IEnumerable<IAnalysedApplicationFile> AnalyseApplication(string projectPath)

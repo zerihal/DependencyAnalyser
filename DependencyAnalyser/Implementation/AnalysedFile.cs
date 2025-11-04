@@ -1,7 +1,7 @@
-﻿using DependencyAnalyser.DotNet.CommonInterfaces;
-using DependencyAnalyser.DotNet.Enums;
+﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Enums;
 
-namespace DependencyAnalyser.DotNet.Implementation
+namespace AssemblyDependencyAnalyser.Implementation
 {
     public class AnalysedFile : IAnalysedFile, IEquatable<AnalysedFile?>
     {
@@ -13,16 +13,30 @@ namespace DependencyAnalyser.DotNet.Implementation
 
         public FileType Type { get; }
 
-        public AnalysedFile(string name, FileType type, IList<string> dependencies)
+        public bool HasBeenAnalysed { get; }
+
+        public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; }
+
+        public AnalysedFile(string name, FileType type, IList<string> dependencies, DotNetFrameworkVersionInfo? dotnetFrameworkInfo = null)
         {
             Name = name;
             Type = type;
             Dependencies = dependencies;
+
+            if (dotnetFrameworkInfo?.HasValue == true)
+                DotNetFrameworkVersionInfo = dotnetFrameworkInfo;
+
+            HasBeenAnalysed = true;
         }
 
         public static AnalysedFile UnsupportedFile(bool isInvalid = false)
         {
             return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>());
+        }
+
+        public static AnalysedFile OtherExeFile(string fileName)
+        {
+            return new AnalysedFile(fileName, FileType.DotNetCoreBootstrapperOrOtherExe, new List<string>());
         }
 
         public override bool Equals(object? obj)

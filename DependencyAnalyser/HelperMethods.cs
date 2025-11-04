@@ -1,8 +1,14 @@
-﻿using DependencyAnalyser.DotNet.Enums;
+﻿using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Extensions;
+using AssemblyDependencyAnalyser.Implementation;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Runtime.Versioning;
+using System.Text;
+using System.Text.RegularExpressions;
 
-namespace DependencyAnalyser.DotNet
+namespace AssemblyDependencyAnalyser
 {
     public static class HelperMethods
     {
@@ -13,7 +19,7 @@ namespace DependencyAnalyser.DotNet
         /// <returns><see cref="AssemblyType"/> of the input stream.</returns>
         public static AssemblyType GetAssemblyType(Stream stream)
         {
-            using var peReader = new PEReader(stream);
+            using var peReader = new PEReader(stream, PEStreamOptions.LeaveOpen);
 
             if (peReader.HasMetadata && peReader.GetMetadataReader() != null)
                 return AssemblyType.Managed;
@@ -28,10 +34,80 @@ namespace DependencyAnalyser.DotNet
         }
 
         /// <summary>
+        /// Gets the assembly type (Managed, Native, Mixed) from a file path.
+        /// </summary>
+        /// <param name="filePath">File path.</param>
+        /// <param name="stream">Output file stream.</param>
+        /// <returns><see cref="AssemblyType"/> of the input file.</returns>
+        public static AssemblyType GetFileType(string filePath, out FileStream stream)
+        {
+            stream = File.OpenRead(filePath);
+            return GetAssemblyType(stream);
+        }
+
+        /// <summary>
         /// Converts a byte array to a MemoryStream.
         /// </summary>
         /// <param name="bytes">Input byte array.</param>
         /// <returns>Stream from bytes.</returns>
         public static Stream GetStreamFromBytes(byte[] bytes) => new MemoryStream(bytes);
+
+        public static DotNetFrameworkVersionInfo? GetFrameworkVersionInfo(Assembly assembly)
+        {
+            var frameworkAttribute = assembly.GetCustomAttribute<TargetFrameworkAttribute>();
+
+            if (frameworkAttribute != null)
+            {
+                var frameworkString = frameworkAttribute.FrameworkDisplayName;
+                var majorVersion = GetDotNetVersion(frameworkAttribute.FrameworkName);
+                if (frameworkString != null || majorVersion != null)
+                {
+                    return new DotNetFrameworkVersionInfo(frameworkString, majorVersion);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the .NET version from the Target Framework attribute string.
+        /// </summary>
+        /// <param name="frameworkAttributeName">Target framework attribute string.</param>
+        /// <returns>.NET version (e.g. 4.72, 5, 6, etc), or null if target framework string cannot be parsed.</returns>
+        private static double? GetDotNetVersion(string? frameworkAttributeName)
+        {
+            if (!string.IsNullOrWhiteSpace(frameworkAttributeName) && frameworkAttributeName.Any(char.IsDigit))
+            {
+                var frameworkAttSubStr = Regex.Match(frameworkAttributeName, @"\d.*").Value;
+
+                if (frameworkAttSubStr != null)
+                {
+                    var versionStr = string.Empty;
+
+                    foreach (var frameworkAttChar in frameworkAttSubStr)
+                    {
+                        if (char.IsDigit(frameworkAttChar) || frameworkAttChar.IsDot())
+                        {
+                            // We have already got major and minor version parts so break
+                            if (frameworkAttChar.IsDot() && versionStr.Contains('.'))
+                                break;
+
+                            versionStr += frameworkAttChar;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    if (versionStr != string.Empty && double.TryParse(versionStr, out var dotNetVer))
+                    {
+                        return dotNetVer;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

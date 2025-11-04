@@ -1,6 +1,7 @@
-﻿using DependencyAnalyser.DotNet.Enums;
+﻿using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Implementation;
 
-namespace DependencyAnalyser.DotNet.CommonInterfaces
+namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
     public interface IAnalysedFile
     {
@@ -11,5 +12,9 @@ namespace DependencyAnalyser.DotNet.CommonInterfaces
         public IList<string> Dependencies { get; }
 
         public FileType Type { get; }
+
+        public bool HasBeenAnalysed { get; }
+
+        public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; }
     }
 }

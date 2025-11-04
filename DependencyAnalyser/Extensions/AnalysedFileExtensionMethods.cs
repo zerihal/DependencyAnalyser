@@ -1,8 +1,8 @@
-﻿using DependencyAnalyser.DotNet.CommonInterfaces;
-using DependencyAnalyser.DotNet.Implementation;
+﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Implementation;
 using PeNet;
 
-namespace DependencyAnalyser.DotNet.Extensions
+namespace AssemblyDependencyAnalyser.Extensions
 {
     public static class AnalysedFileExtensionMethods
     {

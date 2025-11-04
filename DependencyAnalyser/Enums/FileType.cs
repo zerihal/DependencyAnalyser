@@ -1,4 +1,4 @@
-﻿namespace DependencyAnalyser.DotNet.Enums
+﻿namespace AssemblyDependencyAnalyser.Enums
 {
     public enum FileType
     {
@@ -6,6 +6,7 @@
         DotNetExe,
         NativeDll,
         NativeExe,
+        DotNetCoreBootstrapperOrOtherExe,
         Unsupported,
         Invalid
     }

@@ -1,10 +1,10 @@
-﻿using DependencyAnalyser.DotNet.CommonInterfaces;
-using DependencyAnalyser.DotNet.Enums;
-using DependencyAnalyser.DotNet.Extensions;
-using DependencyAnalyser.DotNet.Implementation;
+﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Extensions;
+using AssemblyDependencyAnalyser.Implementation;
 using PeNet;
 
-namespace DependencyAnalyser.DotNet.Native
+namespace AssemblyDependencyAnalyser.Native
 {
     public static class NativeAssemblyMethods
     {
@@ -13,12 +13,18 @@ namespace DependencyAnalyser.DotNet.Native
             // Native assembly analysis logic goes here
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
-            var peFile = new PeFile(ms.ToArray());
+            try
+            {
+                var peFile = new PeFile(ms.ToArray());
+                var dependencies = peFile.ImportedFunctions?.Select(f => f.DLL).Distinct().ToList() ?? new List<string>();
+                var fileType = peFile.IsDll ? FileType.NativeDll : FileType.NativeExe;
 
-            var dependencies = peFile.ImportedFunctions?.Select(f => f.DLL).Distinct().ToList() ?? new List<string>();
-            var fileType = peFile.IsDll ? FileType.NativeDll : FileType.NativeExe;
-
-            return new AnalysedFile(peFile.GetModuleName() ?? "Native Assembly", fileType, dependencies);
+                return new AnalysedFile(peFile.GetModuleName() ?? "Native Assembly", fileType, dependencies);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
