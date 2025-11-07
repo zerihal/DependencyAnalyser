@@ -1,10 +1,18 @@
 ﻿using AssemblyDependencyAnalyser.CommonInterfaces;
+using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Implementation;
 
 namespace DependencyAnalysisTests
 {
     public class SingleFile
     {
+        private const string TestExe1 = "AssemblyAnalyserTestAppDotNet.exe";
+        private const string TestDll1 = "AssemblyAnalyserTestAppDotNet.dll";
+        private const string TestDll2 = "TestAppImplementations1.dll";
+        private const string TestExe2 = "AssemblyAnalyserTestAppCpp.exe";
+        private const string TestDll3 = "CppTestAppCommon.dll";
+
         [Fact]
         public void DotNetAnalysis()
         {
@@ -13,7 +21,47 @@ namespace DependencyAnalysisTests
 
             IDependencyAnalyser analyser = new DependencyAnalyser();
 
-            var analysedExe = analyser.AnalyseAssembly(Path.Combine(dotnetTestProjectPath, "AssemblyAnalyserTestAppDotNet.dll"));
+            // This is a .NET core exe so cannot be parsed as not a real assembly. Check that this is the
+            // case.
+            var analysedExe = analyser.AnalyseAssembly(Path.Combine(dotnetTestProjectPath, TestExe1));
+            Assert.True(analysedExe.HasBeenAnalysed, "Unable to analyse .NET core bootstrapper exe.");
+            Assert.True(analysedExe.PossibleDotNetCoreBootstrapper, "Did not detect .NET core bootstrapper exe.");
+
+            // Now test the .NET core dll for the exe. Although this is a DLL, it is really the executable
+            // assembly. Analyser should detect this.
+            var analysedDll = analyser.AnalyseAssembly(Path.Combine(dotnetTestProjectPath, TestDll1));
+            Assert.True(analysedDll.HasBeenAnalysed, "Unable to analyse .NET core assembly dll.");
+            Assert.Equal(6, analysedDll.Dependencies.Count);
+            Assert.Equal(FileType.DotNetExe, analysedDll.Type);
+
+            analysedDll = analyser.AnalyseAssembly(Path.Combine(dotnetTestProjectPath, TestDll2));
+            Assert.True(analysedDll.HasBeenAnalysed, "Unable to analyse .NET core assembly dll.");
+            Assert.Equal(2, analysedDll.Dependencies.Count);
+            Assert.Equal(FileType.DotNetDll, analysedDll.Type);
+
+            // This should have a reference to Common - check this now.
+            var analysedDllCommonDep = analysedDll.GetDependencyAttributes().FirstOrDefault(da => da.Contains("Common"));
+            Assert.NotNull(analysedDllCommonDep);
+        }
+
+        [Fact]
+        public void NativeAnalysis()
+        {
+            var nativeTestProjectPath = TestPathHelper.GetTestFilesPath("TestApp2");
+            Assert.True(Directory.Exists(nativeTestProjectPath), "Test project path does not exist.");
+
+            IDependencyAnalyser analyser = new DependencyAnalyser();
+
+            var analysedExe = analyser.AnalyseAssembly(Path.Combine(nativeTestProjectPath, TestExe2));
+            Assert.True(analysedExe.HasBeenAnalysed, "Unable to analyse native exe.");
+            Assert.Equal(11, analysedExe.Dependencies.Count);
+            Assert.Contains("CppTestAppCommon.dll", analysedExe.Dependencies);
+            Assert.Equal(FileType.NativeExe, analysedExe.Type);
+
+            var analysedDll = analyser.AnalyseAssembly(Path.Combine(nativeTestProjectPath, TestDll3));
+            Assert.True(analysedExe.HasBeenAnalysed, "Unable to analyse native dll.");
+            Assert.Equal(5, analysedDll.Dependencies.Count);
+            Assert.Equal(FileType.NativeDll, analysedDll.Type);
         }
     }
 }

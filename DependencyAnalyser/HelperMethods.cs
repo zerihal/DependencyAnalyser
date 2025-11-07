@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.Versioning;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AssemblyDependencyAnalyser
@@ -37,11 +36,10 @@ namespace AssemblyDependencyAnalyser
         /// Gets the assembly type (Managed, Native, Mixed) from a file path.
         /// </summary>
         /// <param name="filePath">File path.</param>
-        /// <param name="stream">Output file stream.</param>
         /// <returns><see cref="AssemblyType"/> of the input file.</returns>
-        public static AssemblyType GetFileType(string filePath, out FileStream stream)
+        public static AssemblyType GetFileType(string filePath)
         {
-            stream = File.OpenRead(filePath);
+            var stream = File.OpenRead(filePath);
             return GetAssemblyType(stream);
         }
 

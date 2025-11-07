@@ -13,14 +13,19 @@
         public double? Version { get; }
 
         /// <summary>
-        /// 
+        /// Flag to indicate whether any version information is available.
         /// </summary>
         public bool HasValue => FrameworkVersionString != null || Version != null;
 
-        public DotNetFrameworkVersionInfo(string? frameworkVersionString, double? majorVersion)
+        /// <summary>
+        /// Creates an instance of <see cref="DotNetFrameworkVersionInfo"/>.
+        /// </summary>
+        /// <param name="frameworkVersionString">Framework version string.</param>
+        /// <param name="version">Framework version (major and minor version number).</param>
+        public DotNetFrameworkVersionInfo(string? frameworkVersionString, double? version)
         {
             FrameworkVersionString = frameworkVersionString;
-            Version = majorVersion;
+            Version = version;
         }
     }
 }

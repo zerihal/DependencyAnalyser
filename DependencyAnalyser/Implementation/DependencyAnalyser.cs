@@ -8,26 +8,21 @@ namespace AssemblyDependencyAnalyser.Implementation
 {
     public class DependencyAnalyser : IDependencyAnalyser
     {
+        /// <inheritdoc/>
         public IAnalysedFile AnalyseAssembly(string assemblyPath)
         {
             if (File.Exists(assemblyPath))
             {
-                if (HelperMethods.GetFileType(assemblyPath, out var stream) != AssemblyType.Managed)
+                if (HelperMethods.GetFileType(assemblyPath) != AssemblyType.Managed)
                 {
-                    // C/C++ exe or dll - get native analysed file.
+                    // C/C++ exe or dll, or maybe .NET core bootstrapper (exe) - get native analysed file.
                     try
                     {
-                        using (stream)
-                        {
-                            return NativeAssemblyMethods.GetNativeAnalysedFile(stream);
-                        }
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(File.OpenRead(assemblyPath));
                     }
                     catch
                     {
-                        // .NET core bootstrapper (exe) returns as managed, but will not be interpreted by PeNet / native
-                        // parser, so return as OtherExeFile (will also include other unsupported exe files).
-                        if (Path.GetExtension(assemblyPath).Equals(".exe", StringComparison.OrdinalIgnoreCase))
-                            return AnalysedFile.OtherExeFile(Path.GetFileName(assemblyPath) ?? "[Unsupported executable]");
+                        // Log?
                     }
                 }
                 else
@@ -38,7 +33,7 @@ namespace AssemblyDependencyAnalyser.Implementation
                     }
                     catch
                     {
-                        return AnalyseAssembly(stream);
+                        return AnalyseAssembly(File.OpenRead(assemblyPath));
                     }
                 }
             }
@@ -47,6 +42,7 @@ namespace AssemblyDependencyAnalyser.Implementation
             return AnalysedFile.UnsupportedFile(true);
         }
 
+        /// <inheritdoc/>
         public IAnalysedFile AnalyseAssembly(object assembly)
         {
             Assembly? analysisAssembly = null;
@@ -105,6 +101,7 @@ namespace AssemblyDependencyAnalyser.Implementation
                 HelperMethods.GetFrameworkVersionInfo(analysisAssembly));
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IAnalysedApplicationFile> AnalyseApplication(string projectPath)
         {
             var analysedFiles = new List<IAnalysedApplicationFile>();

@@ -18,6 +18,21 @@ namespace AssemblyDependencyAnalyser.Extensions
         }
 
         /// <summary>
+        /// Gets dependency attributes as string arrays (applicable for .NET assemblies).
+        /// </summary>
+        /// <param name="analysedFile"><see cref="IAnalysedFile"/> to obtain dependency attributes for.</param>
+        /// <returns>Collection of dependency attribute arrays.</returns>
+        public static IEnumerable<string[]> GetDependencyAttributes(this IAnalysedFile analysedFile)
+        {
+            var dependencyAttributes = new List<string[]>();
+
+            foreach (var dependency in analysedFile.Dependencies)
+                dependencyAttributes.Add(dependency.Split(','));
+
+            return dependencyAttributes;
+        }
+
+        /// <summary>
         /// Returns the internal module name (assembly name) from the PE export directory.
         /// Returns null if the PE has no export table.
         /// </summary>
