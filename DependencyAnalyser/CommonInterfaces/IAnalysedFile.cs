@@ -26,7 +26,7 @@ namespace AssemblyDependencyAnalyser.CommonInterfaces
         public FileType Type { get; }
 
         /// <summary>
-        /// 
+        /// High level assembly type (managed, native, or mixed).
         /// </summary>
         public AssemblyType AssemblyType { get; }
 

@@ -19,6 +19,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <inheritdoc/>
         public FileType Type { get; }
 
+        /// <inheritdoc/>
         public AssemblyType AssemblyType { get; }
 
         /// <inheritdoc/>
