@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="PeNet" Version="5.1.0" />
+    <PackageReference Include="SharpCompress" Version="0.41.0" />
   </ItemGroup>
 
 </Project>

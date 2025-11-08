@@ -17,6 +17,15 @@
         public IAnalysedFile AnalyseAssembly(object assembly);
 
         /// <summary>
+        /// Analyses an application archive (e.g. zip file).
+        /// </summary>
+        /// <param name="archiveFile">Archive file containing application files.</param>
+        /// <returns>
+        /// Collection of <see cref="IAnalysedApplicationFile"/>, which contain dependencies and dependents within the project.
+        /// </returns>
+        public IEnumerable<IAnalysedApplicationFile> AnalyseApplicationArchive(string archiveFile);
+
+        /// <summary>
         /// Analyses the application located at the specified project path.
         /// </summary>
         /// <param name="projectPath">Project path.</param>

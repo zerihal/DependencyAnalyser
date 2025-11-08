@@ -5,7 +5,7 @@ namespace AssemblyDependencyAnalyser.Implementation
 {
     public class AnalysedFile : IAnalysedFile, IEquatable<AnalysedFile?>
     {
-        private bool _dotNetCoreExeIndicator;
+        protected bool _dotNetCoreExeIndicator;
 
         /// <inheritdoc/>
         public Guid ID { get; } = Guid.NewGuid();
@@ -26,7 +26,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         public bool PossibleDotNetCoreBootstrapper => Type == FileType.NativeExe && _dotNetCoreExeIndicator;
 
         /// <inheritdoc/>
-        public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; }
+        public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; protected set; }
 
         /// <summary>
         /// Creates an instance of <see cref="IAnalysedFile"/>.

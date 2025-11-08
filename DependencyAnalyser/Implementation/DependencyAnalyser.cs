@@ -2,6 +2,11 @@
 using AssemblyDependencyAnalyser.Enums;
 using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Native;
+using SharpCompress.Archives;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Archives.Tar;
+using SharpCompress.Common;
+using System.IO.Compression;
 using System.Reflection;
 
 namespace AssemblyDependencyAnalyser.Implementation
@@ -102,11 +107,39 @@ namespace AssemblyDependencyAnalyser.Implementation
         }
 
         /// <inheritdoc/>
+        public IEnumerable<IAnalysedApplicationFile> AnalyseApplicationArchive(string archiveFile)
+        {
+            if (File.Exists(archiveFile))
+            {
+                var tempDir = Path.Combine(Path.GetTempPath(), $"DepAnalyser_{Guid.NewGuid()}");
+                Directory.CreateDirectory(tempDir);
+                try
+                {
+                    if (ExtractArchive(archiveFile, tempDir))
+                        return AnalyseApplication(tempDir);
+                }
+                finally
+                {
+                    try
+                    {
+                        Directory.Delete(tempDir, true);
+                    }
+                    catch
+                    {
+                        // Log?
+                    }
+                }
+            }
+
+            return [];
+        }
+
+        /// <inheritdoc/>
         public IEnumerable<IAnalysedApplicationFile> AnalyseApplication(string projectPath)
         {
             var analysedFiles = new List<IAnalysedApplicationFile>();
 
-            if (!Directory.Exists(projectPath))
+            if (Directory.Exists(projectPath))
             {
                 foreach (var file in Directory.GetFiles(projectPath, "*.*", SearchOption.AllDirectories))
                 {
@@ -121,13 +154,71 @@ namespace AssemblyDependencyAnalyser.Implementation
                 foreach (var analysedFile in analysedFiles)
                 {
                     var dependants = analysedFiles.Where(af => 
-                        af.Dependencies.Contains(analysedFile.Name)).Select(af => af.Name).ToList();
+                        af.Dependencies.Contains(analysedFile.Name)).Select(af => af.Name)?.ToList();
 
-                    analysedFile.Dependents.ToList().AddRange(dependants);
+                    if (dependants != null)
+                    {
+                        foreach (var dep in dependants)
+                            analysedFile.Dependents.Add(dep);
+                    }
                 }
             }
 
             return analysedFiles;
+        }
+
+        /// <summary>
+        /// Extracts an archive to the specified destination (i.e. temp folder).
+        /// </summary>
+        /// <param name="archivePath">Archive file (e.g. zip, tar, 7z, etc).</param>
+        /// <param name="destination">Destination to extact files.</param>
+        /// <returns><see langword="True"/> if files extracted or <see langword="false"/> if unrecognised file or exception.</returns>
+        private bool ExtractArchive(string archivePath, string destination)
+        {
+            try
+            {
+                string ext = Path.GetExtension(archivePath).ToLowerInvariant();
+
+                if (ext == ".zip")
+                {
+                    ZipFile.ExtractToDirectory(archivePath, destination);
+                    return true;
+                }
+
+                IArchive archive = ext switch
+                {
+                    ".7z" => SevenZipArchive.Open(archivePath),
+                    ".tar" => TarArchive.Open(archivePath),
+                    ".gz" => TarArchive.Open(archivePath), // handles .tar.gz via stream
+                    _ => ArchiveFactory.Open(archivePath)
+                };
+
+                if (archive != null)
+                {
+                    using (archive)
+                    {
+                        foreach (var entry in archive.Entries)
+                        {
+                            if (!entry.IsDirectory)
+                            {
+                                entry.WriteToDirectory(destination, new ExtractionOptions
+                                {
+                                    ExtractFullPath = true,
+                                    Overwrite = true
+                                });
+                            }
+                        }
+
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Log?
+            }
+
+            return false;
         }
     }
 }

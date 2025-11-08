@@ -13,8 +13,7 @@ namespace AssemblyDependencyAnalyser.Extensions
         /// <returns><see cref="IAnalysedApplicationFile"/> from <see cref="IAnalysedFile"/></returns>
         public static IAnalysedApplicationFile ToAnalysedApplicationFile(this IAnalysedFile analysedFile)
         {
-            return new AnalysedApplicationFile(analysedFile.Name, analysedFile.Type, 
-                analysedFile.Dependencies.ToList());
+            return new AnalysedApplicationFile(analysedFile);
         }
 
         /// <summary>
