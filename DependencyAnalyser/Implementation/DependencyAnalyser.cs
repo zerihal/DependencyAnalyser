@@ -23,7 +23,7 @@ namespace AssemblyDependencyAnalyser.Implementation
                     // C/C++ exe or dll, or maybe .NET core bootstrapper (exe) - get native analysed file.
                     try
                     {
-                        return NativeAssemblyMethods.GetNativeAnalysedFile(File.OpenRead(assemblyPath));
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(File.OpenRead(assemblyPath), AssemblyType.Native);
                     }
                     catch
                     {
@@ -54,15 +54,20 @@ namespace AssemblyDependencyAnalyser.Implementation
 
             try
             {
+                var assemblyType = AssemblyType.Unknown;
+
                 if (assembly is Assembly asm)
                 {
                     analysisAssembly = asm;
+                    assemblyType = AssemblyType.Managed;
                 }
                 else if (assembly is Stream stream)
                 {
-                    if (HelperMethods.GetAssemblyType(stream) != AssemblyType.Managed)
+                    assemblyType = HelperMethods.GetAssemblyType(stream);
+
+                    if (assemblyType != AssemblyType.Managed)
                     {
-                        return NativeAssemblyMethods.GetNativeAnalysedFile(stream);
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(stream, assemblyType);
                     }
 
                     using (var ms = new MemoryStream())
@@ -74,10 +79,11 @@ namespace AssemblyDependencyAnalyser.Implementation
                 else if (assembly is byte[] byteArray)
                 {
                     var bytesStream = HelperMethods.GetStreamFromBytes(byteArray);
+                    assemblyType = HelperMethods.GetAssemblyType(bytesStream);
 
-                    if (HelperMethods.GetAssemblyType(bytesStream) != AssemblyType.Managed)
+                    if (assemblyType != AssemblyType.Managed)
                     {
-                        return NativeAssemblyMethods.GetNativeAnalysedFile(bytesStream);
+                        return NativeAssemblyMethods.GetNativeAnalysedFile(bytesStream, assemblyType);
                     }
 
                     analysisAssembly = Assembly.Load(byteArray);
@@ -102,7 +108,7 @@ namespace AssemblyDependencyAnalyser.Implementation
             var fileType = analysisAssembly.EntryPoint != null ? FileType.DotNetExe : FileType.DotNetDll;
             var referenceAssemblies = analysisAssembly.GetReferencedAssemblies().Select(a => a.FullName).ToList();
 
-            return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies, 
+            return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies, AssemblyType.Managed,
                 HelperMethods.GetFrameworkVersionInfo(analysisAssembly));
         }
 

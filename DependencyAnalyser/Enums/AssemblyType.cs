@@ -13,6 +13,10 @@
         /// <summary>
         /// Mixed-mode Assembly (C++/CLI)
         /// </summary>
-        Mixed
+        Mixed,
+        /// <summary>
+        /// Unknown Assembly.
+        /// </summary>
+        Unknown
     }
 }

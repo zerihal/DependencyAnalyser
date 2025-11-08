@@ -26,6 +26,11 @@ namespace AssemblyDependencyAnalyser.CommonInterfaces
         public FileType Type { get; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public AssemblyType AssemblyType { get; }
+
+        /// <summary>
         /// Indicates whether the file has been analysed.
         /// </summary>
         public bool HasBeenAnalysed { get; }

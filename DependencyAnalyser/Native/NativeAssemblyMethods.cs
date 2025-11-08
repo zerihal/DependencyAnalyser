@@ -14,7 +14,7 @@ namespace AssemblyDependencyAnalyser.Native
         /// </summary>
         /// <param name="stream">Assembly/file/object stream.</param>
         /// <returns><see cref="IAnalysedFile"/> for the native file.</returns>
-        public static IAnalysedFile GetNativeAnalysedFile(Stream stream)
+        public static IAnalysedFile GetNativeAnalysedFile(Stream stream, AssemblyType assemblyType)
         {
             // Native assembly analysis logic goes here
             using var ms = new MemoryStream();
@@ -27,7 +27,8 @@ namespace AssemblyDependencyAnalyser.Native
                 var dependencies = peFile.ImportedFunctions?.Select(f => f.DLL).Distinct().ToList() ?? new List<string>();
                 var fileType = peFile.IsDll ? FileType.NativeDll : FileType.NativeExe;
 
-                return new AnalysedFile(peFile.GetModuleName() ?? "Native Assembly", fileType, dependencies, PossibleDotNetCoreBootstrapper(peFile));
+                return new AnalysedFile(peFile.GetModuleName() ?? "Native Assembly", fileType, dependencies, assemblyType, 
+                    PossibleDotNetCoreBootstrapper(peFile));
             }
             catch (Exception)
             {

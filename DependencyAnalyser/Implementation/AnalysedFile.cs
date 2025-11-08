@@ -19,6 +19,8 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <inheritdoc/>
         public FileType Type { get; }
 
+        public AssemblyType AssemblyType { get; }
+
         /// <inheritdoc/>
         public bool HasBeenAnalysed { get; }
 
@@ -35,11 +37,12 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <param name="type">Analysed file type (<see cref="FileType"/>).</param>
         /// <param name="dependencies">List of dependencies.</param>
         /// <param name="dotnetFrameworkInfo">.NET framework info (if applicable - default is <see langword="null")./></param>
-        public AnalysedFile(string name, FileType type, IList<string> dependencies, DotNetFrameworkVersionInfo? dotnetFrameworkInfo = null)
+        public AnalysedFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, DotNetFrameworkVersionInfo? dotnetFrameworkInfo = null)
         {
             Name = name;
             Type = type;
             Dependencies = dependencies;
+            AssemblyType = assemblyType;
 
             if (dotnetFrameworkInfo?.HasValue == true)
                 DotNetFrameworkVersionInfo = dotnetFrameworkInfo;
@@ -54,10 +57,14 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <param name="type">Analysed file type (<see cref="FileType"/>).</param>
         /// <param name="dependencies">List of dependencies.</param>
         /// <param name="dotNetCoreExeIndicator">Flag to indicate whether this is a possible .NET core exe.</param>
-        public AnalysedFile(string name, FileType type, IList<string> dependencies, bool dotNetCoreExeIndicator)
-            : this(name, type, dependencies)
+        public AnalysedFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, bool dotNetCoreExeIndicator)
+            : this(name, type, dependencies, assemblyType)
         {
             _dotNetCoreExeIndicator = dotNetCoreExeIndicator;
+
+            // If indication is that this is a .NET core exe, this should be considered as a mixed assembly type rather than pure native.
+            if (_dotNetCoreExeIndicator && AssemblyType == AssemblyType.Native)
+                AssemblyType = AssemblyType.Mixed;
         }
 
         /// <summary>
@@ -69,7 +76,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <returns>Base instance of <see cref="IAnalysedFile"/> with unsupported type specified.</returns>
         public static AnalysedFile UnsupportedFile(bool isInvalid = false)
         {
-            return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>());
+            return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>(), AssemblyType.Unknown);
         }
 
         /// <summary>
