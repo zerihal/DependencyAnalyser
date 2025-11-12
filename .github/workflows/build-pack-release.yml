@@ -1,0 +1,91 @@
+name: Dependency Analyser Release Build and Package (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Test
+      run: dotnet test --configuration Release --verbosity normal
+
+    - name: Increment release version
+      id: bump
+      run: |
+        csproj_file="./DependencyAnalyser/AssemblyDependencyAnalyser.csproj"
+        echo "Found project file: $csproj_file"
+    
+        # Extract current version
+        version_line=$(grep -m1 "<Version>" "$csproj_file" || echo "")
+        if [ -z "$version_line" ]; then
+          echo "No <Version> found, defaulting to 1.0.0"
+          current_version="1.0.0"
+          sed -i '/<PropertyGroup>/a <Version>1.0.0</Version>' "$csproj_file"
+        else
+          current_version=$(echo "$version_line" | sed -E 's/.*<Version>(.*)<\/Version>.*/\1/')
+        fi
+    
+        echo "Current version: $current_version"
+
+        # Remove any alpha or prerelease suffix
+        base_version=$(echo "$current_version" | sed -E 's/-.*//')
+
+        # Increment patch version
+        if [[ "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[3]}"
+          new_patch=$((patch + 1))
+          new_version="$major.$minor.$new_patch"
+        else
+          echo "Invalid version format; defaulting to 1.0.0"
+          new_version="1.0.0"
+        fi
+    
+        echo "New version: $new_version"
+    
+        # Replace in file
+        sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" "$csproj_file"
+    
+        # Export outputs for next step
+        echo "new_version=$new_version" >> $GITHUB_OUTPUT
+        echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
+    
+    - name: Commit version bump
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add "${{ steps.bump.outputs.csproj_file }}"
+        git diff --cached --quiet || git commit -m "Release package version ${{ steps.bump.outputs.new_version }}"
+        git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+
+    - name: Pack nuget package
+      run: dotnet pack ./DependencyAnalyser/AssemblyDependencyAnalyser.csproj --configuration Release -o ./artifacts
+
+    - name: Publish to GitHub Packages
+      run: dotnet nuget push "./artifacts/*.nupkg" --source "https://nuget.pkg.github.com/zerihal/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Show new version
+      run: echo "Built and published release version ${{ steps.bump.outputs.new_version }}"
