@@ -78,7 +78,7 @@ jobs:
         git diff --cached --quiet || git commit -m "Bump package version to ${{ steps.bump.outputs.new_version }}"
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
     - name: Pack nuget package
-      run: dotnet pack DocParser/DocParser.csproj --configuration Release -o ./artifacts
+      run: dotnet pack /DependencyAnalyser/AssemblyDependencyAnalyser.csproj --configuration Release -o ./artifacts
 
     - name: Publish to GitHub Packages
       run: dotnet nuget push "./artifacts/*.nupkg" --source "https://nuget.pkg.github.com/zerihal/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
