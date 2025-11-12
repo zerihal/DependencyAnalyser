@@ -3,10 +3,12 @@ using AssemblyDependencyAnalyser.Enums;
 using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Implementation;
 using PeNet;
-using System.Diagnostics;
 
 namespace AssemblyDependencyAnalyser.Native
 {
+    /// <summary>
+    /// Native assembly analysis methods.
+    /// </summary>
     public static class NativeAssemblyMethods
     {
         /// <summary>

@@ -15,6 +15,10 @@
         /// </summary>
         Mixed,
         /// <summary>
+        /// Java Assembly.
+        /// </summary>
+        Java,
+        /// <summary>
         /// Unknown Assembly.
         /// </summary>
         Unknown

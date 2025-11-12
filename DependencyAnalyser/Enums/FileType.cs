@@ -19,6 +19,10 @@
         /// </summary>
         NativeExe,
         /// <summary>
+        /// Java archive file (i.e. *.jar).
+        /// </summary>
+        JavaArchive,
+        /// <summary>
         /// Unsupported file type.
         /// </summary>
         Unsupported,

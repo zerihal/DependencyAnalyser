@@ -7,6 +7,10 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0-alpha.1</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Title>Assembly Analyser</Title>
+    <Description>Analyses .NET and native assemblies, providing basic analysis and dependency information.</Description>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

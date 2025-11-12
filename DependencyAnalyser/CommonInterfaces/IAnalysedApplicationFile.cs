@@ -1,5 +1,8 @@
 ﻿namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IAnalysedApplicationFile : IAnalysedFile
     {
         /// <summary>

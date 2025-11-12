@@ -7,12 +7,15 @@ namespace AssemblyDependencyAnalyser.Extensions
     public static class AnalysedFileExtensionMethods
     {
         /// <summary>
-        /// Converts an IAnalysedFile to an IAnalysedApplicationFile.
+        /// Converts an IAnalysedFile (or IAnalysedJavaFile) to an IAnalysedApplicationFile.
         /// </summary>
         /// <param name="analysedFile"><see cref="IAnalysedFile"/> to convert.</param>
         /// <returns><see cref="IAnalysedApplicationFile"/> from <see cref="IAnalysedFile"/></returns>
         public static IAnalysedApplicationFile ToAnalysedApplicationFile(this IAnalysedFile analysedFile)
         {
+            if (analysedFile is IAnalysedJavaFile analysedJavaFile)
+                return new AnalysedJavaAppFile(analysedJavaFile);
+
             return new AnalysedApplicationFile(analysedFile);
         }
 

@@ -1,6 +1,7 @@
 ﻿using AssemblyDependencyAnalyser.CommonInterfaces;
 using AssemblyDependencyAnalyser.Enums;
 using AssemblyDependencyAnalyser.Extensions;
+using AssemblyDependencyAnalyser.Java;
 using AssemblyDependencyAnalyser.Native;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
@@ -11,6 +12,9 @@ using System.Reflection;
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DependencyAnalyser : IDependencyAnalyser
     {
         /// <inheritdoc/>
@@ -18,6 +22,10 @@ namespace AssemblyDependencyAnalyser.Implementation
         {
             if (File.Exists(assemblyPath))
             {
+                // Check whether this is a Java file - is so then return IAnalysedJavaFile
+                if (JavaAssemblyMethods.IsJavaArchive(assemblyPath, out var analysedJavaFile))
+                    return analysedJavaFile ?? AnalysedJavaFile.NonMavenJavaFile();
+
                 if (HelperMethods.GetFileType(assemblyPath) != AssemblyType.Managed)
                 {
                     // C/C++ exe or dll, or maybe .NET core bootstrapper (exe) - get native analysed file.
@@ -63,6 +71,9 @@ namespace AssemblyDependencyAnalyser.Implementation
                 }
                 else if (assembly is Stream stream)
                 {
+                    if (JavaAssemblyMethods.IsJavaArchive(stream, out var analysedJavaFile))
+                        return analysedJavaFile ?? AnalysedJavaFile.NonMavenJavaFile();
+
                     assemblyType = HelperMethods.GetAssemblyType(stream);
 
                     if (assemblyType != AssemblyType.Managed)
@@ -79,6 +90,10 @@ namespace AssemblyDependencyAnalyser.Implementation
                 else if (assembly is byte[] byteArray)
                 {
                     var bytesStream = HelperMethods.GetStreamFromBytes(byteArray);
+
+                    if (JavaAssemblyMethods.IsJavaArchive(bytesStream, out var analysedJavaFile))
+                        return analysedJavaFile ?? AnalysedJavaFile.NonMavenJavaFile();
+
                     assemblyType = HelperMethods.GetAssemblyType(bytesStream);
 
                     if (assemblyType != AssemblyType.Managed)
@@ -152,8 +167,12 @@ namespace AssemblyDependencyAnalyser.Implementation
                     if (file.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
                         file.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     {
-                        var analysedFile = AnalyseAssembly(file);
-                        analysedFiles.Add(analysedFile.ToAnalysedApplicationFile());
+                        //var analysedFile = AnalyseAssembly(file);
+                        analysedFiles.Add(AnalyseAssembly(file).ToAnalysedApplicationFile());
+                    }
+                    else if (file.EndsWith(".jar", StringComparison.OrdinalIgnoreCase))
+                    {
+                        analysedFiles.Add(AnalyseAssembly(file).ToAnalysedApplicationFile());
                     }
                 }
 

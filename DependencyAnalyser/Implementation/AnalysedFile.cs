@@ -23,7 +23,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         public AssemblyType AssemblyType { get; }
 
         /// <inheritdoc/>
-        public bool HasBeenAnalysed { get; }
+        public bool HasBeenAnalysed { get; protected set; }
 
         /// <inheritdoc/>
         public bool PossibleDotNetCoreBootstrapper => Type == FileType.NativeExe && _dotNetCoreExeIndicator;
