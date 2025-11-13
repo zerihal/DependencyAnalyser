@@ -1,5 +1,8 @@
 ﻿namespace AssemblyDependencyAnalyser.Extensions
 {
+    /// <summary>
+    /// Char extension methods.
+    /// </summary>
     public static class CharExtensionMethods
     {
         /// <summary>

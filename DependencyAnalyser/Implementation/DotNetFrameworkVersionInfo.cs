@@ -1,5 +1,8 @@
 ﻿namespace AssemblyDependencyAnalyser.Implementation
 {
+    /// <summary>
+    /// .NET framework metadata.
+    /// </summary>
     public class DotNetFrameworkVersionInfo
     {
         /// <summary>

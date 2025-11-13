@@ -3,7 +3,7 @@ using AssemblyDependencyAnalyser.Enums;
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IAnalysedJavaFile"/>
     public class AnalysedJavaFile : AnalysedFile, IAnalysedJavaFile
     {
         /// <inheritdoc/>

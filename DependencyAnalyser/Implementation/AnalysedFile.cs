@@ -3,8 +3,12 @@ using AssemblyDependencyAnalyser.Enums;
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
+    /// <inheritdoc cref="IAnalysedFile"/>
     public class AnalysedFile : IAnalysedFile, IEquatable<AnalysedFile?>
     {
+        /// <summary>
+        /// Flag to indicate wether this assembly is a .NET core exe.
+        /// </summary>
         protected bool _dotNetCoreExeIndicator;
 
         /// <inheritdoc/>

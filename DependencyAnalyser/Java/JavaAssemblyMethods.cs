@@ -1,5 +1,6 @@
 ﻿using AssemblyDependencyAnalyser.CommonInterfaces;
 using AssemblyDependencyAnalyser.Implementation;
+using AssemblyDependencyAnalyser.Logging;
 using System.IO.Compression;
 using System.Xml.Linq;
 
@@ -156,7 +157,7 @@ namespace AssemblyDependencyAnalyser.Java
             }
             catch (Exception e)
             {
-                // Log?
+                Logger.LogException("Error checking potential Java file or performing analysis", e);
             }
 
             return false;

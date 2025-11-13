@@ -3,6 +3,7 @@ using AssemblyDependencyAnalyser.Enums;
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
+    /// <inheritdoc cref="IAnalysedApplicationFile"/>
     public class AnalysedApplicationFile : AnalysedFile, IAnalysedApplicationFile
     {
         /// <inheritdoc/>

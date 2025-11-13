@@ -1,5 +1,6 @@
 ﻿using AssemblyDependencyAnalyser.CommonInterfaces;
 using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Exceptions;
 using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Implementation;
 using PeNet;
@@ -15,6 +16,7 @@ namespace AssemblyDependencyAnalyser.Native
         /// Analyses a native assembly from a stream and returns an <see cref="IAnalysedFile"/> instance.
         /// </summary>
         /// <param name="stream">Assembly/file/object stream.</param>
+        /// <param name="assemblyType">Assembly type.</param>
         /// <returns><see cref="IAnalysedFile"/> for the native file.</returns>
         public static IAnalysedFile GetNativeAnalysedFile(Stream stream, AssemblyType assemblyType)
         {
@@ -32,9 +34,9 @@ namespace AssemblyDependencyAnalyser.Native
                 return new AnalysedFile(peFile.GetModuleName() ?? "Native Assembly", fileType, dependencies, assemblyType, 
                     PossibleDotNetCoreBootstrapper(peFile));
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                throw new FileAnalysisException(AssemblyType.Native, e.Message);
             }
         }
 

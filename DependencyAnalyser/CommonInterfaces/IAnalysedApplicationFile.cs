@@ -1,7 +1,7 @@
 ﻿namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
     /// <summary>
-    /// 
+    /// Analysed application file (i.e. from a complete application or collection of assemblies).
     /// </summary>
     public interface IAnalysedApplicationFile : IAnalysedFile
     {

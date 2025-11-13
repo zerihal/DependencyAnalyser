@@ -1,5 +1,8 @@
 ﻿namespace AssemblyDependencyAnalyser.Enums
 {
+    /// <summary>
+    /// File type.
+    /// </summary>
     public enum FileType
     {
         /// <summary>

@@ -1,8 +1,11 @@
 ﻿using AssemblyDependencyAnalyser.CommonInterfaces;
 using AssemblyDependencyAnalyser.Enums;
+using AssemblyDependencyAnalyser.Exceptions;
 using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Java;
+using AssemblyDependencyAnalyser.Logging;
 using AssemblyDependencyAnalyser.Native;
+using Microsoft.Extensions.Logging;
 using SharpCompress.Archives;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Archives.Tar;
@@ -12,9 +15,7 @@ using System.Reflection;
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <inheritdoc cref="IDependencyAnalyser"/>
     public class DependencyAnalyser : IDependencyAnalyser
     {
         /// <inheritdoc/>
@@ -33,9 +34,9 @@ namespace AssemblyDependencyAnalyser.Implementation
                     {
                         return NativeAssemblyMethods.GetNativeAnalysedFile(File.OpenRead(assemblyPath), AssemblyType.Native);
                     }
-                    catch
+                    catch (FileAnalysisException e)
                     {
-                        // Log?
+                        Logger.LogException("Native assembly analysis error", e);
                     }
                 }
                 else
@@ -51,7 +52,7 @@ namespace AssemblyDependencyAnalyser.Implementation
                 }
             }
 
-            // Log?
+            Logger.Log($"File from {assemblyPath} is not supported for analysis");
             return AnalysedFile.UnsupportedFile(true);
         }
 
@@ -110,13 +111,14 @@ namespace AssemblyDependencyAnalyser.Implementation
             }
             catch (Exception e)
             {
-                // Log exception
+                Logger.LogException("Assembly analysis error", e);
                 return AnalysedFile.UnsupportedFile(true);
             }
 
             if (analysisAssembly == null)
             {
                 // Should not be reached, but just in case
+                Logger.Log("Analysis assembly is null", LogLevel.Warning);
                 return AnalysedFile.UnsupportedFile();
             }
 
@@ -145,9 +147,10 @@ namespace AssemblyDependencyAnalyser.Implementation
                     {
                         Directory.Delete(tempDir, true);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        // Log?
+                        Logger.Log($"Exception deleting temp directory for application analysis ({e.Message}). " +
+                            $"This should be auto cleared at later point.", LogLevel.Warning);
                     }
                 }
             }
@@ -238,9 +241,9 @@ namespace AssemblyDependencyAnalyser.Implementation
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // Log?
+                Logger.LogException("Error extracting archive", e);
             }
 
             return false;

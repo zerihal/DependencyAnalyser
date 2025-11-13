@@ -4,6 +4,9 @@ using PeNet;
 
 namespace AssemblyDependencyAnalyser.Extensions
 {
+    /// <summary>
+    /// Analysed file extension methods.
+    /// </summary>
     public static class AnalysedFileExtensionMethods
     {
         /// <summary>

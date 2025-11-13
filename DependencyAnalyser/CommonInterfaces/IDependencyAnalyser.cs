@@ -1,5 +1,9 @@
 ﻿namespace AssemblyDependencyAnalyser.CommonInterfaces
 {
+    /// <summary>
+    /// Dependency analyser that accepts either a single or collection assembly files, or an archive
+    /// (e.g. zip file) containing an entire project or collection of files.
+    /// </summary>
     public interface IDependencyAnalyser
     {
         /// <summary>

@@ -1,5 +1,8 @@
 ﻿namespace AssemblyDependencyAnalyser.Enums
 {
+    /// <summary>
+    /// Assembly type.
+    /// </summary>
     public enum AssemblyType
     {
         /// <summary>

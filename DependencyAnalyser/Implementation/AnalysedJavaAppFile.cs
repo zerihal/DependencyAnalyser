@@ -2,7 +2,7 @@
 
 namespace AssemblyDependencyAnalyser.Implementation
 {
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IAnalysedApplicationFile"/>
     public class AnalysedJavaAppFile : AnalysedJavaFile, IAnalysedApplicationFile
     {
         /// <inheritdoc/>
