@@ -1,7 +1,4 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: Dependency Analyser Alpha Build and Package (Manual)
+name: Dependency Analyser Release Build and Package (Manual)
 
 on:
   workflow_dispatch:
@@ -17,20 +14,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
           8.0.x
           9.0.x
+
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
       run: dotnet build --configuration Release
+
     - name: Test
       run: dotnet test --configuration Release --verbosity normal
 
-    - name: Increment alpha version
+    - name: Increment release version
       id: bump
       run: |
         csproj_file="./DependencyAnalyser/AssemblyDependencyAnalyser.csproj"
@@ -39,26 +40,28 @@ jobs:
         # Extract current version
         version_line=$(grep -m1 "<Version>" "$csproj_file" || echo "")
         if [ -z "$version_line" ]; then
-          echo "No <Version> found, defaulting to 1.0.0-alpha.0"
-          current_version="1.0.0-alpha.0"
-          sed -i '/<PropertyGroup>/a <Version>1.0.0-alpha.0</Version>' "$csproj_file"
+          echo "No <Version> found, defaulting to 1.0.0"
+          current_version="1.0.0"
+          sed -i '/<PropertyGroup>/a <Version>1.0.0</Version>' "$csproj_file"
         else
           current_version=$(echo "$version_line" | sed -E 's/.*<Version>(.*)<\/Version>.*/\1/')
         fi
     
         echo "Current version: $current_version"
 
-        # Detect alpha suffix
-        if [[ "$current_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-alpha\.([0-9]+)$ ]]; then
+        # Remove any alpha or prerelease suffix
+        base_version=$(echo "$current_version" | sed -E 's/-.*//')
+
+        # Increment patch version
+        if [[ "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
           major="${BASH_REMATCH[1]}"
           minor="${BASH_REMATCH[2]}"
           patch="${BASH_REMATCH[3]}"
-          alpha="${BASH_REMATCH[4]}"
-          new_alpha=$((alpha + 1))
-          new_version="$major.$minor.$patch-alpha.$new_alpha"
+          new_patch=$((patch + 1))
+          new_version="$major.$minor.$new_patch"
         else
-          # If version isn't alpha, convert it into alpha.1
-          new_version="${current_version}-alpha.1"
+          echo "Invalid version format; defaulting to 1.0.0"
+          new_version="1.0.0"
         fi
     
         echo "New version: $new_version"
@@ -75,13 +78,14 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git add "${{ steps.bump.outputs.csproj_file }}"
-        git diff --cached --quiet || git commit -m "Bump package version to ${{ steps.bump.outputs.new_version }}"
+        git diff --cached --quiet || git commit -m "Release package version ${{ steps.bump.outputs.new_version }}"
         git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+
     - name: Pack nuget package
-      run: dotnet pack DependencyAnalyser/AssemblyDependencyAnalyser.csproj --configuration Release -o ./artifacts
+      run: dotnet pack ./DependencyAnalyser/AssemblyDependencyAnalyser.csproj --configuration Release -o ./artifacts
 
     - name: Publish to GitHub Packages
       run: dotnet nuget push "./artifacts/*.nupkg" --source "https://nuget.pkg.github.com/zerihal/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
 
     - name: Show new version
-      run: echo "Built and published version ${{ steps.bump.outputs.new_version }}"
+      run: echo "Built and published release version ${{ steps.bump.outputs.new_version }}"
