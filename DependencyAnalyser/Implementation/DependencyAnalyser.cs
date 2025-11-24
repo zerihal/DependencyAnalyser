@@ -85,6 +85,7 @@ namespace AssemblyDependencyAnalyser.Implementation
                     using (var ms = new MemoryStream())
                     {
                         stream.CopyTo(ms);
+                        ms.Position = 0;
                         analysisAssembly = Assembly.Load(ms.ToArray());
                     }
                 }

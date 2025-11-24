@@ -159,6 +159,11 @@ namespace AssemblyDependencyAnalyser.Java
             {
                 Logger.LogException("Error checking potential Java file or performing analysis", e);
             }
+            finally
+            {
+                // Ensure stream position is reset to 0.
+                file.Position = 0;
+            }
 
             return false;
         }

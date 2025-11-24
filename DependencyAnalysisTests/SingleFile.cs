@@ -39,6 +39,21 @@ namespace DependencyAnalysisTests
         }
 
         [Fact]
+        public void StreamFileAnalysis()
+        {
+            // As per above test but this tests with an input of type stream.
+            var dotnetTestProjectPath = TestPathHelper.GetTestFilesPath(TestFiles.TestApp1Root);
+            Assert.True(Directory.Exists(dotnetTestProjectPath), "Test project path does not exist.");
+
+            IDependencyAnalyser analyser = new DependencyAnalyser();
+
+            var fileStream = File.OpenRead(Path.Combine(dotnetTestProjectPath, TestFiles.TestDll1));
+            var analysedDll = analyser.AnalyseAssembly(fileStream);
+            Assert.Equal(6, analysedDll.Dependencies.Count);
+            Assert.Equal(FileType.DotNetExe, analysedDll.Type);
+        }
+
+        [Fact]
         public void NativeAnalysis()
         {
             var nativeTestProjectPath = TestPathHelper.GetTestFilesPath(TestFiles.TestApp2Root);

@@ -18,18 +18,26 @@ namespace AssemblyDependencyAnalyser
         /// <returns><see cref="AssemblyType"/> of the input stream.</returns>
         public static AssemblyType GetAssemblyType(Stream stream)
         {
-            using var peReader = new PEReader(stream, PEStreamOptions.LeaveOpen);
-
-            if (peReader.HasMetadata && peReader.GetMetadataReader() != null)
-                return AssemblyType.Managed;
-
-            if (peReader.PEHeaders.CorHeader is CorHeader corHeader)
+            try
             {
-                if ((corHeader.Flags & CorFlags.ILOnly) == 0)
-                    return AssemblyType.Mixed;
-            }
+                using var peReader = new PEReader(stream, PEStreamOptions.LeaveOpen);
 
-            return AssemblyType.Native;
+                if (peReader.HasMetadata && peReader.GetMetadataReader() != null)
+                    return AssemblyType.Managed;
+
+                if (peReader.PEHeaders.CorHeader is CorHeader corHeader)
+                {
+                    if ((corHeader.Flags & CorFlags.ILOnly) == 0)
+                        return AssemblyType.Mixed;
+                }
+
+                return AssemblyType.Native;
+            }
+            finally
+            {
+                // Ensure stream position is reset to 0.
+                stream.Position = 0;
+            }
         }
 
         /// <summary>

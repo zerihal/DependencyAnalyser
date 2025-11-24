@@ -9,8 +9,8 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>Assembly Analyser</Title>
     <Description>Analyses .NET and native assemblies, providing basic analysis and dependency information.</Description>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <AssemblyVersion>1.0.3.1</AssemblyVersion>
+    <FileVersion>1.0.3.1</FileVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/zerihal/DependencyAnalyser</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
