@@ -65,10 +65,10 @@ namespace AssemblyDependencyAnalyser
             if (frameworkAttribute != null)
             {
                 var frameworkString = frameworkAttribute.FrameworkDisplayName;
-                var majorVersion = GetDotNetVersion(frameworkAttribute.FrameworkName);
-                if (frameworkString != null || majorVersion != null)
+                var netVersion = GetDotNetVersion(frameworkAttribute.FrameworkName);
+                if (frameworkString != null || netVersion != null)
                 {
-                    return new DotNetFrameworkVersionInfo(frameworkString, majorVersion);
+                    return new DotNetFrameworkVersionInfo(frameworkString, netVersion);
                 }
             }
 
@@ -80,7 +80,7 @@ namespace AssemblyDependencyAnalyser
         /// </summary>
         /// <param name="frameworkAttributeName">Target framework attribute string.</param>
         /// <returns>.NET version (e.g. 4.72, 5, 6, etc), or null if target framework string cannot be parsed.</returns>
-        private static double? GetDotNetVersion(string? frameworkAttributeName)
+        public static double? GetDotNetVersion(string? frameworkAttributeName)
         {
             if (!string.IsNullOrWhiteSpace(frameworkAttributeName) && frameworkAttributeName.Any(char.IsDigit))
             {

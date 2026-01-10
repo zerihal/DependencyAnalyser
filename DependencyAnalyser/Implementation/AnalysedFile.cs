@@ -35,12 +35,16 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <inheritdoc/>
         public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; protected set; }
 
+        /// <inheritdoc/>
+        public string? AnalyseError { get; protected set; }
+
         /// <summary>
         /// Creates an instance of <see cref="IAnalysedFile"/>.
         /// </summary>
         /// <param name="name">Analysed file name.</param>
         /// <param name="type">Analysed file type (<see cref="FileType"/>).</param>
         /// <param name="dependencies">List of dependencies.</param>
+        /// <param name="assemblyType">Assembly type.</param>
         /// <param name="dotnetFrameworkInfo">.NET framework info (if applicable - default is <see langword="null")./></param>
         public AnalysedFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, DotNetFrameworkVersionInfo? dotnetFrameworkInfo = null)
         {
@@ -61,6 +65,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <param name="name">Analysed file name.</param>
         /// <param name="type">Analysed file type (<see cref="FileType"/>).</param>
         /// <param name="dependencies">List of dependencies.</param>
+        /// <param name="assemblyType">Assembly type.</param>
         /// <param name="dotNetCoreExeIndicator">Flag to indicate whether this is a possible .NET core exe.</param>
         public AnalysedFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, bool dotNetCoreExeIndicator)
             : this(name, type, dependencies, assemblyType)
@@ -81,7 +86,34 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <returns>Base instance of <see cref="IAnalysedFile"/> with unsupported type specified.</returns>
         public static AnalysedFile UnsupportedFile(bool isInvalid = false)
         {
-            return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>(), AssemblyType.Unknown);
+            return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>(), AssemblyType.Unknown) 
+            { 
+                HasBeenAnalysed = false
+            };
+        }
+
+        /// <summary>
+        /// Creates an instance of an analysed file representing an unsupported or invalid .NET file.
+        /// </summary>
+        /// <param name="isInvalid">
+        /// Indicates whether the file should be marked as invalid. If <see langword="true"/>, the file is considered
+        /// invalid; otherwise, it is considered unsupported.
+        /// </param>
+        /// <param name="errorMsg">
+        /// An optional error message describing the reason the file is unsupported or invalid. Can be <see
+        /// langword="null"/> if no error message is available.
+        /// </param>
+        /// <returns>
+        /// An <see cref="AnalysedFile"/> instance representing an unsupported or invalid .NET file, with the specified
+        /// error state and message.
+        /// </returns>
+        public static AnalysedFile UnsupportedDotNetFile(bool isInvalid = false, string? errorMsg = null)
+        {
+            return new AnalysedFile(string.Empty, isInvalid ? FileType.Invalid : FileType.Unsupported, new List<string>(), AssemblyType.Managed) 
+            { 
+                AnalyseError = errorMsg,
+                HasBeenAnalysed = false
+            };
         }
 
         /// <summary>

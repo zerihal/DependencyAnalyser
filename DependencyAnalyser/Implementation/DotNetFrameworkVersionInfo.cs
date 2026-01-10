@@ -11,7 +11,7 @@
         public string? FrameworkVersionString { get; }
 
         /// <summary>
-        /// Major .NET version (e.g. 4, 5, 6, etc)
+        /// Major and minor .NET version (e.g. 4.8, 5.0, 6.0, etc)
         /// </summary>
         public double? Version { get; }
 

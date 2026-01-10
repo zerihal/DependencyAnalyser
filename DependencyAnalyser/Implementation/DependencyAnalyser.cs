@@ -18,6 +18,33 @@ namespace AssemblyDependencyAnalyser.Implementation
     /// <inheritdoc cref="IDependencyAnalyser"/>
     public class DependencyAnalyser : IDependencyAnalyser
     {
+        private double? _runtimeNetVersion;
+
+        /// <summary>
+        /// Initializes a new instance of the DependencyAnalyser class, preparing it to analyze dependencies and
+        /// retrieve .NET runtime version information for the current assembly.
+        /// </summary>
+        /// <remarks>
+        /// If the .NET runtime version cannot be determined, analysis errors will not include
+        /// .NET mismatch information. This constructor logs any exceptions encountered during initialization but allows
+        /// the instance to be created regardless.
+        /// </remarks>
+        public DependencyAnalyser()
+        {
+            try
+            {
+                if (HelperMethods.GetFrameworkVersionInfo(Assembly.GetExecutingAssembly()) is DotNetFrameworkVersionInfo fwInfo)
+                {
+                    _runtimeNetVersion = fwInfo.Version;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log($"Exception getting .NET runtime version ({e.Message}). " +
+                    $"Analysis errors will not include .NET mismatch information.", LogLevel.Warning);
+            }
+        }
+
         /// <inheritdoc/>
         public IAnalysedFile AnalyseAssembly(string assemblyPath)
         {
@@ -123,11 +150,34 @@ namespace AssemblyDependencyAnalyser.Implementation
                 return AnalysedFile.UnsupportedFile();
             }
 
-            var fileType = analysisAssembly.EntryPoint != null ? FileType.DotNetExe : FileType.DotNetDll;
-            var referenceAssemblies = analysisAssembly.GetReferencedAssemblies().Select(a => a.FullName).ToList();
+            // If the target assembly .NET version is higher than the runtime version, return unsupported file. The below will attempt to obtain as much
+            // information as possible from the exception.
+            try
+            {
+                var fileType = analysisAssembly.EntryPoint != null ? FileType.DotNetExe : FileType.DotNetDll;
+                var referenceAssemblies = analysisAssembly.GetReferencedAssemblies().Select(a => a.FullName).ToList();
 
-            return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies, AssemblyType.Managed,
-                HelperMethods.GetFrameworkVersionInfo(analysisAssembly));
+                return new AnalysedFile(analysisAssembly.FullName ?? ".NET Assembly", fileType, referenceAssemblies, AssemblyType.Managed,
+                    HelperMethods.GetFrameworkVersionInfo(analysisAssembly));
+            }
+            catch (FileNotFoundException ex1)
+            {
+                if (_runtimeNetVersion != null && TryGetFrameworkVersionFromFileName(ex1.FileName, out var netFrameworkVersion))
+                {
+                    if (netFrameworkVersion > _runtimeNetVersion)
+                    {
+                        var error = $"Missing assembly {ex1.FileName}. Target .NET version {netFrameworkVersion} is higher than runtime .NET version {_runtimeNetVersion}.";
+                        return AnalysedFile.UnsupportedDotNetFile(errorMsg: error);
+                    }
+                }
+
+                return AnalysedFile.UnsupportedDotNetFile(
+                    errorMsg: $"Possible missing assembly due to higher target .NET version than runtime version (exception: {ex1.Message})");
+            }
+            catch (Exception ex2)
+            {
+                return AnalysedFile.UnsupportedDotNetFile(errorMsg: $"General .NET assembly analysis error (exception: {ex2.Message})");
+            }
         }
 
         /// <inheritdoc/>
@@ -245,6 +295,53 @@ namespace AssemblyDependencyAnalyser.Implementation
             catch (Exception e)
             {
                 Logger.LogException("Error extracting archive", e);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to extract the .NET Framework version number from the specified file name.
+        /// </summary>
+        /// <remarks>
+        /// This method does not throw exceptions for invalid or unexpected file name formats. If the file name
+        /// does not contain a recognizable version segment, or if parsing fails, the method returns false
+        /// and sets the output parameter to zero.
+        /// </remarks>
+        /// <param name="filename">
+        /// The file name to parse for a .NET Framework version segment. Must contain a segment in the format
+        /// 'version={number}'.
+        /// </param>
+        /// <param name="netFrameworkVersion">
+        /// When this method returns, contains the parsed .NET Framework version number if extraction succeeds;
+        /// otherwise, zero.
+        /// </param>
+        /// <returns>true if the .NET Framework version was successfully extracted from the file name; otherwise, false.</returns>
+        private bool TryGetFrameworkVersionFromFileName(string? filename, out double netFrameworkVersion)
+        {
+            netFrameworkVersion = 0.0;
+
+            if (filename == null)
+                return false;
+
+            try
+            {
+                var versionSegment = filename.Split(',').FirstOrDefault(s => s.ToLower().Contains("version="))?.Trim();
+
+                if (versionSegment != null)
+                {
+                    var verNo = versionSegment.Replace("version=", "", StringComparison.OrdinalIgnoreCase);
+
+                    if (HelperMethods.GetDotNetVersion(verNo) is double verNoDbl)
+                    {
+                        netFrameworkVersion = verNoDbl;
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore
             }
 
             return false;

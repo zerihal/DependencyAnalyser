@@ -27,6 +27,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <param name="name">Application file name.</param>
         /// <param name="type">File type (<see cref="FileType"/>)</param>
         /// <param name="dependencies">List of dependencies.</param>
+        /// <param name="assemblyType">Assembly type.</param>
         /// <param name="dotNetCoreExeIndicator">Flag to indicate whether this is a possible .NET core exe.</param>
         public AnalysedApplicationFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, 
             bool dotNetCoreExeIndicator) : base(name, type, dependencies, assemblyType, dotNetCoreExeIndicator)
@@ -42,6 +43,8 @@ namespace AssemblyDependencyAnalyser.Implementation
         {
             DotNetFrameworkVersionInfo = analysedFile.DotNetFrameworkVersionInfo;
             _dotNetCoreExeIndicator = analysedFile.PossibleDotNetCoreBootstrapper;
+            AnalyseError = analysedFile.AnalyseError;
+            HasBeenAnalysed = analysedFile.HasBeenAnalysed;
         }
     }
 }

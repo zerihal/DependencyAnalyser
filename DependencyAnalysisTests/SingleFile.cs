@@ -21,6 +21,7 @@ namespace DependencyAnalysisTests
             Assert.True(analysedExe.HasBeenAnalysed, "Unable to analyse .NET core bootstrapper exe.");
             Assert.True(analysedExe.PossibleDotNetCoreBootstrapper, "Did not detect .NET core bootstrapper exe.");
 
+#if NET9_0_OR_GREATER
             // Now test the .NET core dll for the exe. Although this is a DLL, it is really the executable
             // assembly. Analyser should detect this.
             var analysedDll = analyser.AnalyseAssembly(Path.Combine(dotnetTestProjectPath, TestFiles.TestDll1));
@@ -36,6 +37,7 @@ namespace DependencyAnalysisTests
             // This should have a reference to Common - check this now.
             var analysedDllCommonDep = analysedDll.GetDependencyAttributes().FirstOrDefault(da => da.Contains("Common"));
             Assert.NotNull(analysedDllCommonDep);
+#endif
         }
 
         [Fact]
@@ -49,8 +51,13 @@ namespace DependencyAnalysisTests
 
             var fileStream = File.OpenRead(Path.Combine(dotnetTestProjectPath, TestFiles.TestDll1));
             var analysedDll = analyser.AnalyseAssembly(fileStream);
+
+#if NET8_0
+            Assert.False(analysedDll.HasBeenAnalysed, "Analysis of .NET 9 dll should not be possible from .NET 8 runtime");
+#else
             Assert.Equal(6, analysedDll.Dependencies.Count);
             Assert.Equal(FileType.DotNetExe, analysedDll.Type);
+#endif
         }
 
         [Fact]

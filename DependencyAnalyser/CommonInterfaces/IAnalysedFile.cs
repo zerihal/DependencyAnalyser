@@ -46,6 +46,11 @@ namespace AssemblyDependencyAnalyser.CommonInterfaces
         public bool PossibleDotNetCoreBootstrapper { get; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string? AnalyseError { get; }
+
+        /// <summary>
         /// Information about the .NET Framework version if applicable.
         /// </summary>
         public DotNetFrameworkVersionInfo? DotNetFrameworkVersionInfo { get; }
