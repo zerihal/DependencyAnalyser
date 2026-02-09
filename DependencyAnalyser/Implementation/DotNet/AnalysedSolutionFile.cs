@@ -88,18 +88,6 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
             else
             {
                 return DotNetProjectHelperMethods.GetProjectFiles(slnFile);
-
-                //var slnContent = File.ReadAllLines(Path.Combine(_solutionFileDirectory, $"{Name}{_slnExtension}"));
-                //var projectLines = slnContent.Where(line => line.StartsWith("Project("));
-                //var projectFilePaths = projectLines.Select(line =>
-                //{
-                //    var parts = line.Split(',');
-                //    if (parts.Length < 2) return null;
-                //    var relativePath = parts[1].Trim().Trim('"');
-                //    return Path.Combine(_solutionFileDirectory, relativePath);
-                //}).Where(path => path != null && File.Exists(path)).Select(path => path!);
-
-                //return projectFilePaths;
             }
         }
 
