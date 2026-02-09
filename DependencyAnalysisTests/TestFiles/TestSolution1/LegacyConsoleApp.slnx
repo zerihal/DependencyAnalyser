@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LegacyConsoleApp/LegacyConsoleApp.csproj" Id="07498eb0-f72e-421b-9d45-f033352b0a54" />
+  <Project Path="Test/Test.csproj" Id="6ee7a9ad-307d-44ce-8115-24f3afb7ac8b" />
+</Solution>

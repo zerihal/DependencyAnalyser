@@ -15,7 +15,7 @@ namespace AssemblyDependencyAnalyser.Implementation
         /// <param name="name">Application file name.</param>
         /// <param name="type">File type (<see cref="FileType"/>)</param>
         /// <param name="dependencies">List of dependencies.</param>
-        /// <param name="dotNetInfo">.NET framework info (if applicable - default is <see langword="null")./></param>
+        /// <param name="dotNetInfo">.NET framework info (if applicable - default is <see langword="null"/>).</param>
         public AnalysedApplicationFile(string name, FileType type, IList<string> dependencies, AssemblyType assemblyType, 
             DotNetFrameworkVersionInfo? dotNetInfo = null) : base(name, type, dependencies, assemblyType, dotNetInfo)
         {

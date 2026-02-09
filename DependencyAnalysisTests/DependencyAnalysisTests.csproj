@@ -23,7 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TestFiles\" />
+    <Compile Remove="TestFiles\TestSolution2\**\*.*" />
+    <Compile Remove="TestFiles\TestSolution1\**\*.*" />
+    <None Include="TestFiles\TestSolution2\**\*.*" />
+    <None Include="TestFiles\TestSolution1\**\*.*" />
   </ItemGroup>
 
 </Project>
