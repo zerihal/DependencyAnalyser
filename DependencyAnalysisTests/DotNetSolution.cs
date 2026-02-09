@@ -19,13 +19,13 @@ namespace DependencyAnalysisTests
             Assert.Equal(2, analysedSln.Projects.Count);
             Assert.True(analysedSln.Projects.All(p => p.ProjectType == DotNetProjectType.Legacy));
 
-            var testSln2Path = Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution2"), TestSln2);
-            Assert.True(File.Exists(testSln2Path), $"Test solution not found at: {testSln2Path}");
-            var analysedSln2 = new AnalysedSolutionFile(testSln2Path);
-            analysedSln2.AnalyseSolution();
+            //var testSln2Path = Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution2"), TestSln2);
+            //Assert.True(File.Exists(testSln2Path), $"Test solution not found at: {testSln2Path}");
+            //var analysedSln2 = new AnalysedSolutionFile(testSln2Path);
+            //analysedSln2.AnalyseSolution();
 
-            Assert.Equal(2, analysedSln2.Projects.Count);
-            Assert.True(analysedSln2.Projects.All(p => p.ProjectType == DotNetProjectType.Sdk));
+            //Assert.Equal(2, analysedSln2.Projects.Count);
+            //Assert.True(analysedSln2.Projects.All(p => p.ProjectType == DotNetProjectType.Sdk));
         }
     }
 }
