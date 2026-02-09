@@ -11,15 +11,17 @@ namespace DependencyAnalysisTests
         [Fact]
         public void AnalyseSolution()
         {
-            Assert.True(File.Exists(TestSln1), $"Test solution not found at: {TestSln1}");
-            var analysedSln = new AnalysedSolutionFile(Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution1"), TestSln1));
+            var testSln1Path = Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution1"), TestSln1);
+            Assert.True(File.Exists(testSln1Path), $"Test solution not found at: {testSln1Path}");
+            var analysedSln = new AnalysedSolutionFile(testSln1Path);
             analysedSln.AnalyseSolution();
 
             Assert.Equal(2, analysedSln.Projects.Count);
             Assert.True(analysedSln.Projects.All(p => p.ProjectType == DotNetProjectType.Legacy));
 
-            Assert.True(File.Exists(TestSln2), $"Test solution not found at: {TestSln2}");
-            var analysedSln2 = new AnalysedSolutionFile(Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution2"), TestSln2));
+            var testSln2Path = Path.Combine(TestPathHelper.GetTestFilesPath("TestSolution2"), TestSln2);
+            Assert.True(File.Exists(testSln2Path), $"Test solution not found at: {testSln2Path}");
+            var analysedSln2 = new AnalysedSolutionFile(testSln2Path);
             analysedSln2.AnalyseSolution();
 
             Assert.Equal(2, analysedSln2.Projects.Count);
