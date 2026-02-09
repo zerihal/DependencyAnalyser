@@ -1,4 +1,5 @@
 ﻿using AssemblyDependencyAnalyser.Enums;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace AssemblyDependencyAnalyser.Implementation.DotNet
@@ -8,6 +9,11 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
     /// </summary>
     internal static class DotNetProjectHelperMethods
     {
+        // Pattern matches lines like:
+        // Project("{GUID}") = "ProjectName", "relative\path\to\project.csproj", "{GUID}"
+        private static Regex ProjectLineRegex = new Regex(@"Project\(""\{.*\}""\)\s*=\s*""[^""]+"",\s*""([^""]+)""", 
+            RegexOptions.Compiled);
+
         /// <summary>
         /// Analyses a .NET project file and populates the provided project file model with metadata such as project
         /// type, target frameworks, dependencies, and package references.
@@ -89,6 +95,46 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Failed to load project file: {filePath}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates all existing project files (.csproj, .vbproj, etc.) in a solution safely.
+        /// Works cross-platform and ignores malformed or missing entries.
+        /// </summary>
+        /// <param name="solutionFilePath">Full path to the .sln file</param>
+        /// <returns>Enumerable of absolute paths to project files</returns>
+        internal static IEnumerable<string> GetProjectFiles(string solutionFilePath)
+        {
+            if (!File.Exists(solutionFilePath))
+                throw new FileNotFoundException("Solution file not found.", solutionFilePath);
+
+            var solutionDirectory = Path.GetDirectoryName(solutionFilePath)!;
+            var slnContent = File.ReadAllLines(solutionFilePath);
+
+            foreach (var line in slnContent)
+            {
+                if (!line.StartsWith("Project(", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var match = ProjectLineRegex.Match(line);
+                if (!match.Success)
+                    continue; // skip malformed lines
+
+                var relativePath = match.Groups[1].Value
+                    .Trim()
+                    .Replace('\\', Path.DirectorySeparatorChar) // normalize slashes
+                    .Replace('/', Path.DirectorySeparatorChar);
+
+                var fullPath = Path.Combine(solutionDirectory, relativePath);
+
+                if (!File.Exists(fullPath))
+                {
+                    Console.WriteLine($"Warning: Project file not found: {fullPath}");
+                    continue; // skip missing projects
+                }
+
+                yield return fullPath;
             }
         }
 

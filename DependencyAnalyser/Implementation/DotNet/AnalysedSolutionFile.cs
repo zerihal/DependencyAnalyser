@@ -63,10 +63,12 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
 
         private IEnumerable<string> GetProjectFilePathsFromSolution()
         {
+            var slnFile = Path.Combine(_solutionFileDirectory, $"{Name}{_slnExtension}");
+
             if (_slnExtension == ".slnx")
             {
                 var slnxProjects = new List<string>();
-                var slnxContent = XDocument.Load(Path.Combine(_solutionFileDirectory, $"{Name}{_slnExtension}"));
+                var slnxContent = XDocument.Load(slnFile);
                 var projectElements = slnxContent.Descendants("Project");
                 foreach (var projectElement in projectElements)
                 {
@@ -85,17 +87,19 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
             }
             else
             {
-                var slnContent = File.ReadAllLines(Path.Combine(_solutionFileDirectory, $"{Name}{_slnExtension}"));
-                var projectLines = slnContent.Where(line => line.StartsWith("Project("));
-                var projectFilePaths = projectLines.Select(line =>
-                {
-                    var parts = line.Split(',');
-                    if (parts.Length < 2) return null;
-                    var relativePath = parts[1].Trim().Trim('"');
-                    return Path.Combine(_solutionFileDirectory, relativePath);
-                }).Where(path => path != null && File.Exists(path)).Select(path => path!);
+                return DotNetProjectHelperMethods.GetProjectFiles(slnFile);
 
-                return projectFilePaths;
+                //var slnContent = File.ReadAllLines(Path.Combine(_solutionFileDirectory, $"{Name}{_slnExtension}"));
+                //var projectLines = slnContent.Where(line => line.StartsWith("Project("));
+                //var projectFilePaths = projectLines.Select(line =>
+                //{
+                //    var parts = line.Split(',');
+                //    if (parts.Length < 2) return null;
+                //    var relativePath = parts[1].Trim().Trim('"');
+                //    return Path.Combine(_solutionFileDirectory, relativePath);
+                //}).Where(path => path != null && File.Exists(path)).Select(path => path!);
+
+                //return projectFilePaths;
             }
         }
 
