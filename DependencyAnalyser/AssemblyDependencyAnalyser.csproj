@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.0.0</Version>
+    <Version>1.0.0</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>Assembly Analyser</Title>
     <Description>Analyses .NET and native assemblies, providing basic analysis and dependency information.</Description>
