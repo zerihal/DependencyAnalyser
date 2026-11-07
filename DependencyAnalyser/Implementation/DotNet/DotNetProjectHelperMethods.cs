@@ -68,10 +68,10 @@ namespace AssemblyDependencyAnalyser.Implementation.DotNet
                     .Where(v => !string.IsNullOrWhiteSpace(v)).Select(Path.GetFileNameWithoutExtension).OfType<string>()
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
-                // 4. Get non project dependency references (similar to the above, but need to strip out additional info such as version or culture).
+                // 4. Get non project dependency references (similar to the above, but need to strip out additional info such as version or culture
+                // and do not need to remove file extension).
                 projectFile.NonProjectDependencies = projFile.Descendants().Where(e => e.Name.LocalName == "Reference").Select(e => e.Attribute("Include")?.Value)
-                    .Where(v => !string.IsNullOrWhiteSpace(v)).Select(v => v!.Split(',')[0]).Select(name => Path.GetFileNameWithoutExtension(name))
-                    .OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                    .Where(v => !string.IsNullOrWhiteSpace(v)).Select(v => v!.Split(',')[0]).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
                 // 4. Get package references (i.e. NuGet packages referenced via <PackageReference>).
                 projectFile.PackageReferences = projFile.Descendants().Where(e => e.Name.LocalName == "PackageReference").Select(e => e.Attribute("Include")?.Value)
