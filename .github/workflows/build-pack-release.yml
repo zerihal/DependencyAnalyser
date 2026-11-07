@@ -39,40 +39,52 @@ jobs:
         echo "Found project file: $csproj_file"
     
         # Extract current version
-        version_line=$(grep -m1 "<Version>" "$csproj_file" || echo "")
+        version_line=$(grep -m1 '<Version>' "$csproj_file" || true)
+    
         if [ -z "$version_line" ]; then
-          echo "No <Version> found, defaulting to 1.0.0"
-          current_version="1.0.0"
-          sed -i '/<PropertyGroup>/a <Version>1.0.0</Version>' "$csproj_file"
+          echo "No <Version> found, defaulting to 1.0.0.0"
+          current_version="1.0.0.0"
+          sed -i '/<PropertyGroup>/a <Version>1.0.0.0</Version>' "$csproj_file"
         else
-          current_version=$(echo "$version_line" | sed -E 's/.*<Version>(.*)<\/Version>.*/\1/')
+          current_version=$(echo "$version_line" | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
         fi
     
         echo "Current version: $current_version"
-
-        # Remove any alpha or prerelease suffix
-        base_version=$(echo "$current_version" | sed -E 's/-.*//')
-
-        # Increment patch version
-        if [[ "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+    
+        # Remove any prerelease suffix
+        base_version="${current_version%%-*}"
+    
+        # Increment the final numeric component
+        if [[ "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
           major="${BASH_REMATCH[1]}"
           minor="${BASH_REMATCH[2]}"
           patch="${BASH_REMATCH[3]}"
+          revision="${BASH_REMATCH[4]}"
+    
+          new_revision=$((revision + 1))
+          new_version="$major.$minor.$patch.$new_revision"
+    
+        elif [[ "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[3]}"
+    
           new_patch=$((patch + 1))
           new_version="$major.$minor.$new_patch"
+    
         else
-          echo "Invalid version format; defaulting to 1.0.0"
-          new_version="1.0.0"
+          echo "Invalid version format: $current_version"
+          exit 1
         fi
     
         echo "New version: $new_version"
     
-        # Replace in file
-        sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" "$csproj_file"
+        # Replace the version in the project file
+        sed -i "s|<Version>[^<]*</Version>|<Version>$new_version</Version>|" "$csproj_file"
     
         # Export outputs for next step
-        echo "new_version=$new_version" >> $GITHUB_OUTPUT
-        echo "csproj_file=$csproj_file" >> $GITHUB_OUTPUT
+        echo "new_version=$new_version" >> "$GITHUB_OUTPUT"
+        echo "csproj_file=$csproj_file" >> "$GITHUB_OUTPUT"
     
     - name: Commit version bump
       run: |
