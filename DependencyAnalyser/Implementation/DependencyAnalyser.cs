@@ -266,10 +266,10 @@ namespace AssemblyDependencyAnalyser.Implementation
 
                 IArchive archive = ext switch
                 {
-                    ".7z" => SevenZipArchive.Open(archivePath),
-                    ".tar" => TarArchive.Open(archivePath),
-                    ".gz" => TarArchive.Open(archivePath), // handles .tar.gz via stream
-                    _ => ArchiveFactory.Open(archivePath)
+                    ".7z" => SevenZipArchive.OpenArchive(archivePath),
+                    ".tar" => TarArchive.OpenArchive(archivePath),
+                    ".gz" => TarArchive.OpenArchive(archivePath), // handles .tar.gz via stream
+                    _ => ArchiveFactory.OpenArchive(archivePath)
                 };
 
                 if (archive != null)

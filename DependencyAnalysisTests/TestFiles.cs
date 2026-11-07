@@ -13,8 +13,10 @@ namespace DependencyAnalysisTests
         public static string TestDll2 = "TestAppImplementations1.dll";
         public static string TestExe2 = "AssemblyAnalyserTestAppCpp.exe";
         public static string TestDll3 = "CppTestAppCommon.dll";
+        public static string TestDllNet48 = "TestLibNet48.dll";
 
         public static string TestApp1Root = "TestApp1";
         public static string TestApp2Root = "TestApp2";
+        public static string TestFilesRoot = "Files";
     }
 }

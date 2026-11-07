@@ -2,6 +2,7 @@
 using AssemblyDependencyAnalyser.Enums;
 using AssemblyDependencyAnalyser.Extensions;
 using AssemblyDependencyAnalyser.Implementation;
+using AssemblyDependencyAnalyser.Implementation.DotNet;
 
 namespace DependencyAnalysisTests
 {
@@ -78,6 +79,25 @@ namespace DependencyAnalysisTests
             Assert.True(analysedExe.HasBeenAnalysed, "Unable to analyse native dll.");
             Assert.Equal(5, analysedDll.Dependencies.Count);
             Assert.Equal(FileType.NativeDll, analysedDll.Type);
+        }
+
+        [Fact]
+        public void BasicDotNetAssemblyInfoTest()
+        {
+            var dotnetTestProjectPath = TestPathHelper.GetTestFilesPath(TestFiles.TestApp1Root);
+            Assert.True(Directory.Exists(dotnetTestProjectPath), "Test project path does not exist.");
+            var testDll1Path = Path.Combine(dotnetTestProjectPath, TestFiles.TestDll1);
+            var basicInfo = new DotNetAssemblyAnalyser().GetBasicAssemblyInfo(testDll1Path);
+            Assert.True(basicInfo.IsDotNetAssembly, "Basic assembly info did not detect .NET assembly.");
+            Assert.NotNull(basicInfo.FrameworkVersionInfo);
+
+            var testFilesPath = TestPathHelper.GetTestFilesPath(TestFiles.TestFilesRoot);
+            Assert.True(Directory.Exists(testFilesPath), "Test files path does not exist.");
+            var testDllNet48Path = Path.Combine(testFilesPath, TestFiles.TestDllNet48);
+            var basicInfoNet48 = new DotNetAssemblyAnalyser().GetBasicAssemblyInfo(testDllNet48Path);
+            Assert.True(basicInfoNet48.IsDotNetAssembly, "Basic assembly info did not detect .NET assembly.");
+            Assert.NotNull(basicInfoNet48.FrameworkVersionInfo);
+            Assert.Equal(basicInfoNet48.FrameworkVersionInfo.Version, (double)4.8);
         }
     }
 }

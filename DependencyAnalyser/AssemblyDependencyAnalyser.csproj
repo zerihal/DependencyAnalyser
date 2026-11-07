@@ -5,12 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>1.2.0.1</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>Assembly Analyser</Title>
     <Description>Analyses .NET and native assemblies, providing basic analysis and dependency information.</Description>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
+    <AssemblyVersion>1.2.0.1</AssemblyVersion>
+    <FileVersion>1.2.0.1</FileVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/zerihal/DependencyAnalyser</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -37,7 +37,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
     <PackageReference Include="PeNet" Version="5.1.0" />
-    <PackageReference Include="SharpCompress" Version="0.41.0" />
+    <PackageReference Include="SharpCompress" Version="0.50.8" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
